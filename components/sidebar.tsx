@@ -65,6 +65,7 @@ export function Sidebar() {
   const [currentWorkspaceIndex, setCurrentWorkspaceIndex] = React.useState(0)
   const [keySequence, setKeySequence] = React.useState<string>("")
   const [commandOpen, setCommandOpen] = React.useState(false)
+  const [workspaceMenuOpen, setWorkspaceMenuOpen] = React.useState(false)
   const { theme, setTheme } = useTheme()
   const { toggleSidebar } = useSidebar()
   
@@ -141,7 +142,7 @@ export function Sidebar() {
     >
       <SidebarHeader className="!p-3">
         <div className="flex items-center gap-2 w-full">
-          <DropdownMenu>
+          <DropdownMenu open={workspaceMenuOpen} onOpenChange={setWorkspaceMenuOpen}>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 pl-2">
                 <Avatar className="w-4 h-4 rounded-[4px]">
@@ -149,7 +150,7 @@ export function Sidebar() {
                   <AvatarFallback className="text-xs rounded-[4px]">{currentWorkspace.name[0]}</AvatarFallback>
                 </Avatar>
                 <span className="text-sm font-medium">{currentWorkspace.name}</span>
-                <ChevronDownIcon className="h-4 w-4" />
+                <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${workspaceMenuOpen ? '-rotate-180' : ''}`} />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="!w-[280px]" sideOffset={24}>
@@ -251,7 +252,7 @@ export function Sidebar() {
                       </Link>
                     </SidebarMenuButton>
                     {isNotifications && (
-                      <SidebarMenuBadge>3</SidebarMenuBadge>
+                      <SidebarMenuBadge className="text-xs text-muted-foreground">4</SidebarMenuBadge>
                     )}
                   </SidebarMenuItem>
                 )
@@ -259,9 +260,9 @@ export function Sidebar() {
         </SidebarMenu>
       </SidebarContent>
       <SidebarFooter className="p-3">
-        <Button variant="ghost" className="w-full justify-start">
+        <Button variant="outline" size="icon" className="rounded-full">
           <HelpCircleIcon className="h-4 w-4" />
-          <span>Help</span>
+          <span className="sr-only">Help</span>
         </Button>
       </SidebarFooter>
       <CommandDialog open={commandOpen} onOpenChange={setCommandOpen}>

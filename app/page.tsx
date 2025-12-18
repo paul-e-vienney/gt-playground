@@ -1,8 +1,13 @@
+"use client"
+
 import { Empty, EmptyHeader, EmptyTitle, EmptyDescription, EmptyMedia, EmptyContent } from "@/components/ui/empty"
 import { Button } from "@/components/ui/button"
 import { GitPullRequestIcon, PlusIcon } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function Page() {
+  const router = useRouter()
+
   return (
     <div className="flex items-center justify-center flex-1 w-full">
       <Empty className="-mt-16">
@@ -16,7 +21,7 @@ export default function Page() {
           </EmptyDescription>
         </EmptyHeader>
         <EmptyContent>
-          <Button>
+          <Button onClick={() => router.push("/ai-agents")} className="pr-4">
             <PlusIcon />
             Create PR
           </Button>
