@@ -6,7 +6,13 @@ import {
 } from "@/components/ui/prompt-input"
 import { PromptSuggestion } from "@/components/ui/prompt-suggestion"
 import { Button } from "@/components/ui/button"
-import { ArrowUpIcon, PaperclipIcon } from "lucide-react"
+import {
+  ArrowUpIcon,
+  BotIcon,
+  GitPullRequestIcon,
+  PaperclipIcon,
+  SparklesIcon,
+} from "lucide-react"
 import { useState } from "react"
 
 export default function AIAgentsPage() {
@@ -56,18 +62,21 @@ export default function AIAgentsPage() {
           <PromptSuggestion 
             onClick={() => handleSuggestionClick("Create a new AI agent")}
             className="px-6"
+            icon={<BotIcon className="h-4 w-4 text-muted-foreground" />}
           >
             Create a new AI agent
           </PromptSuggestion>
           <PromptSuggestion 
             onClick={() => handleSuggestionClick("Review pull requests")}
             className="px-6"
+            icon={<GitPullRequestIcon className="h-4 w-4 text-muted-foreground" />}
           >
             Review pull requests
           </PromptSuggestion>
           <PromptSuggestion 
             onClick={() => handleSuggestionClick("Automate code review")}
             className="px-6"
+            icon={<SparklesIcon className="h-4 w-4 text-muted-foreground" />}
           >
             Automate code review
           </PromptSuggestion>

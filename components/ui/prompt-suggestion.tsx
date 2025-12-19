@@ -6,6 +6,7 @@ import { VariantProps } from "class-variance-authority"
 
 export type PromptSuggestionProps = {
   children: React.ReactNode
+  icon?: React.ReactNode
   variant?: VariantProps<typeof buttonVariants>["variant"]
   size?: VariantProps<typeof buttonVariants>["size"]
   className?: string
@@ -14,6 +15,7 @@ export type PromptSuggestionProps = {
 
 function PromptSuggestion({
   children,
+  icon,
   variant,
   size,
   className,
@@ -28,9 +30,10 @@ function PromptSuggestion({
       <Button
         variant={variant || "outline"}
         size={size || "lg"}
-        className={cn("rounded-full", className)}
+        className={cn("rounded-full gap-2", className)}
         {...props}
       >
+        {icon}
         {children}
       </Button>
     )
@@ -42,12 +45,13 @@ function PromptSuggestion({
         variant={variant || "ghost"}
         size={size || "sm"}
         className={cn(
-          "w-full cursor-pointer justify-start rounded-xl py-2",
+          "w-full cursor-pointer justify-start gap-2 rounded-xl py-2",
           "hover:bg-accent",
           className
         )}
         {...props}
       >
+        {icon}
         {children}
       </Button>
     )
@@ -63,12 +67,13 @@ function PromptSuggestion({
       variant={variant || "ghost"}
       size={size || "sm"}
       className={cn(
-        "w-full cursor-pointer justify-start gap-0 rounded-xl py-2",
+        "w-full cursor-pointer justify-start gap-2 rounded-xl py-2",
         "hover:bg-accent",
         className
       )}
       {...props}
     >
+      {icon}
       {shouldHighlight ? (
         (() => {
           const index = contentLower.indexOf(highlightLower)
