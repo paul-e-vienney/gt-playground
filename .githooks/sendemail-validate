@@ -1,0 +1,101 @@
+#!/bin/sh
+#
+# Validates patches sent with `git send-email`.
+# This is based on Git's stock `sendemail-validate.sample`, with the TODOs
+# replaced by concrete checks suitable for this repository.
+#
+# Enable (opt-in):
+#   git config core.hooksPath .githooks
+#   chmod +x .githooks/sendemail-validate
+#
+# Notes:
+# - This hook runs in a temporary worktree created for validation.
+# - It should exit non-zero to block sending.
+
+set -eu
+
+die() {
+  echo "sendemail-validate: error: $*" >&2
+  exit 1
+}
+
+warn() {
+  echo "sendemail-validate: warning: $*" >&2
+}
+
+validate_cover_letter () {
+  file="$1"
+
+  # Basic sanity: ensure it isn't empty.
+  if ! test -s "$file"; then
+    die "cover letter is empty"
+  fi
+
+  # Basic formatting: reject trailing whitespace in the cover letter.
+  if grep -nE '[[:space:]]+$' "$file" >/dev/null 2>&1; then
+    die "cover letter contains trailing whitespace"
+  fi
+
+  return 0
+}
+
+validate_patch () {
+  file="$1"
+
+  # Ensure that the patch applies without conflicts.
+  git am -3 "$file" || return 1
+
+  # Reject whitespace errors introduced by the patch.
+  # `git diff --check` prints issues and exits 0, so we must inspect output.
+  ws="$(git diff --check HEAD^..HEAD || true)"
+  if test -n "$ws"; then
+    echo "$ws" >&2
+    die "patch introduces whitespace errors"
+  fi
+
+  return 0
+}
+
+validate_series () {
+  # Run repo checks when available; keep this lightweight and predictable.
+  if test -f package.json; then
+    if test -d node_modules; then
+      npm -s run lint || die "lint failed"
+      npm -s run build || die "build failed"
+    else
+      warn "node_modules not present; skipping lint/build"
+    fi
+  fi
+
+  return 0
+}
+
+# main -------------------------------------------------------------------------
+
+if test "${GIT_SENDEMAIL_FILE_COUNTER:-}" = 1
+then
+  remote="$(git config --default origin --get sendemail.validateRemote)" &&
+  ref="$(git config --default HEAD --get sendemail.validateRemoteRef)" &&
+  worktree="$(mktemp --tmpdir -d sendemail-validate.XXXXXXX)" &&
+  git worktree add -fd --checkout "$worktree" "refs/remotes/$remote/$ref" &&
+  git config --replace-all sendemail.validateWorktree "$worktree"
+else
+  worktree="$(git config --get sendemail.validateWorktree)"
+fi || die "failed to prepare worktree"
+
+unset GIT_DIR GIT_WORK_TREE
+cd "$worktree" || die "failed to enter worktree"
+
+if grep -q "^diff --git " "$1"
+then
+  validate_patch "$1"
+else
+  validate_cover_letter "$1"
+fi
+
+if test "${GIT_SENDEMAIL_FILE_COUNTER:-}" = "${GIT_SENDEMAIL_FILE_TOTAL:-}"
+then
+  git config --unset-all sendemail.validateWorktree || true
+  trap 'git worktree remove -ff "$worktree"' EXIT
+  validate_series
+fi
